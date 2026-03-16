@@ -1,0 +1,187 @@
+/* ============================================================ *
+ *  Niri Monitor Manager – GTK4 Custom Stylesheet               *
+ * ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
+
+/* ── Root / Window ─────────────────────────────────────────── */
+window {
+  background-color: #0e0e12;
+  color: #e2e2ef;
+  font-family: "Inter", "Cantarell", sans-serif;
+}
+
+/* ── Header bar ─────────────────────────────────────────────── */
+headerbar {
+  background-color: #141420;
+  border-bottom: 1px solid rgba(130, 100, 255, 0.18);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  min-height: 52px;
+  padding: 0 12px;
+}
+
+headerbar .title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #d0cfff;
+}
+
+/* ── Scrolled content area ──────────────────────────────────── */
+scrolledwindow {
+  background-color: transparent;
+}
+
+.main-box {
+  padding: 24px;
+  background-color: transparent;
+}
+
+/* ── Section label ──────────────────────────────────────────── */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #7e7ea8;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* ── Monitor card ───────────────────────────────────────────── */
+.monitor-card {
+  background: linear-gradient(145deg, rgba(30,28,55,0.85), rgba(20,18,42,0.92));
+  border: 1px solid rgba(130, 100, 255, 0.18);
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.monitor-card:hover {
+  border-color: rgba(140, 110, 255, 0.45);
+  box-shadow:
+    0 6px 32px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(140,110,255,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.monitor-card.active {
+  border-color: rgba(100, 200, 255, 0.4);
+}
+
+.monitor-card.disabled {
+  opacity: 0.72;
+}
+
+/* ── Monitor icon ───────────────────────────────────────────── */
+.monitor-icon {
+  font-size: 34px;
+  min-width: 48px;
+}
+
+/* ── Monitor name ───────────────────────────────────────────── */
+.monitor-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #dddeff;
+  margin-bottom: 3px;
+}
+
+.monitor-model {
+  font-size: 12px;
+  color: #6e6e96;
+}
+
+/* ── Status & mode badges ───────────────────────────────────── */
+.badge {
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.badge-active {
+  background-color: rgba(80, 220, 140, 0.15);
+  color: #58e6a0;
+  border: 1px solid rgba(80,220,140,0.3);
+}
+
+.badge-disabled {
+  background-color: rgba(120, 120, 160, 0.15);
+  color: #7878a8;
+  border: 1px solid rgba(120,120,160,0.25);
+}
+
+.badge-mode {
+  background-color: rgba(110, 100, 240, 0.18);
+  color: #a89fff;
+  border: 1px solid rgba(110,100,240,0.3);
+}
+
+/* ── Toggle switch ──────────────────────────────────────────── */
+switch {
+  border-radius: 20px;
+  min-width: 52px;
+  min-height: 26px;
+  background-color: rgba(80,80,120,0.4);
+  border: 1px solid rgba(120,120,180,0.3);
+  transition: background-color 200ms ease;
+}
+
+switch:checked {
+  background-color: rgba(100, 180, 255, 0.7);
+  border-color: rgba(100,180,255,0.5);
+}
+
+switch slider {
+  border-radius: 50%;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+/* ── Refresh button ─────────────────────────────────────────── */
+.refresh-btn {
+  background: rgba(100, 90, 220, 0.18);
+  border: 1px solid rgba(130, 100, 255, 0.35);
+  border-radius: 10px;
+  color: #a89fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(130, 100, 255, 0.3);
+  color: #d0cfff;
+}
+
+.refresh-btn:active {
+  background: rgba(130, 100, 255, 0.45);
+}
+
+/* ── Status bar ─────────────────────────────────────────────── */
+.status-bar {
+  font-size: 11px;
+  color: #44445a;
+  margin-top: 6px;
+}
+
+/* ── Toast / notification label ─────────────────────────────── */
+.toast-label {
+  font-size: 12px;
+  color: #a89fff;
+  background-color: rgba(30, 28, 55, 0.9);
+  border: 1px solid rgba(130, 100, 255, 0.4);
+  border-radius: 8px;
+  padding: 6px 16px;
+}
+
+.toast-label.error {
+  color: #ff8080;
+  border-color: rgba(255,80,80,0.35);
+}
