@@ -1,7 +1,8 @@
 """
 monitor_backend.py
 ------------------
-Parses `niri msg outputs` and wraps `wlr-randr` to enable/disable monitors.
+Parses `niri msg outputs` and wraps `wlr-randr` to control monitors.
+Supports: enable/disable, resolution change, refresh rate change.
 """
 
 import re
@@ -18,6 +19,10 @@ class MonitorMode:
     current: bool = False
 
     @property
+    def refresh_label(self) -> str:
+        return f"{self.refresh:.3f} Hz"
+
+    @property
     def label(self) -> str:
         flags = []
         if self.current:
@@ -25,7 +30,7 @@ class MonitorMode:
         if self.preferred:
             flags.append("preferred")
         flag_str = f"  [{', '.join(flags)}]" if flags else ""
-        return f"{self.resolution} @ {self.refresh:.2f} Hz{flag_str}"
+        return f"{self.resolution} @ {self.refresh:.3f} Hz{flag_str}"
 
 
 @dataclass
@@ -33,7 +38,7 @@ class Monitor:
     connector: str          # e.g. "eDP-1", "HDMI-A-1"
     model: str              # human label from niri
     enabled: bool
-    current_mode: Optional[str]  # e.g. "1920x1080 @ 100.00 Hz"
+    current_mode: Optional[str]  # e.g. "1920x1080 @ 100.001 Hz"
     modes: list[MonitorMode] = field(default_factory=list)
     physical_size: Optional[str] = None  # e.g. "530x290 mm"
     scale: Optional[float] = None
@@ -45,21 +50,37 @@ class Monitor:
 
     @property
     def display_name(self) -> str:
-        """Short model name stripped of newlines."""
+        """Short model name stripped of extra whitespace."""
         return " ".join(self.model.split())
 
     @property
-    def resolution(self) -> Optional[str]:
-        if self.current_mode:
-            parts = self.current_mode.split("@")
-            return parts[0].strip() if parts else None
+    def current_resolution(self) -> Optional[str]:
+        if self.current_mode and "@" in self.current_mode:
+            return self.current_mode.split("@")[0].strip()
         return None
 
     @property
-    def refresh_rate(self) -> Optional[str]:
+    def current_refresh(self) -> Optional[float]:
         if self.current_mode and "@" in self.current_mode:
-            return self.current_mode.split("@")[1].strip()
+            hz_str = self.current_mode.split("@")[1].strip()
+            try:
+                return float(hz_str.replace("Hz", "").strip())
+            except ValueError:
+                return None
         return None
+
+    def resolutions(self) -> list[str]:
+        """Unique resolutions in the order they appear (highest first)."""
+        seen = []
+        for m in self.modes:
+            if m.resolution not in seen:
+                seen.append(m.resolution)
+        return seen
+
+    def refresh_rates_for(self, resolution: str) -> list[MonitorMode]:
+        """All modes that match the given resolution, ordered by refresh desc."""
+        matches = [m for m in self.modes if m.resolution == resolution]
+        return sorted(matches, key=lambda m: m.refresh, reverse=True)
 
 
 def get_monitors() -> list[Monitor]:
@@ -79,16 +100,11 @@ def get_monitors() -> list[Monitor]:
 
 def _parse_niri_outputs(text: str) -> list[Monitor]:
     monitors: list[Monitor] = []
-
-    # Split by double-newlines to get per-output blocks, but niri separates
-    # outputs with a blank line after the last field, so we split on the
-    # Output header lines which always start at column 0.
     output_blocks = re.split(r'\n(?=Output ")', text.strip())
 
     for block in output_blocks:
         if not block.strip():
             continue
-
         monitor = _parse_output_block(block)
         if monitor:
             monitors.append(monitor)
@@ -101,20 +117,19 @@ def _parse_output_block(block: str) -> Optional[Monitor]:
     if not lines:
         return None
 
-    # First line: Output "Model\nvariant" (CONNECTOR)    [Disabled | Current mode: ...]
     first_line = lines[0]
 
-    # Extract connector name
+    # Extract connector name e.g. (eDP-1)
     connector_match = re.search(r'\(([^)]+)\)', first_line)
     if not connector_match:
         return None
     connector = connector_match.group(1).strip()
 
-    # Extract model – everything in the first double-quotes
+    # Extract model label from first double-quoted string
     model_match = re.search(r'Output\s+"([^"]+)"', first_line)
     model = model_match.group(1).strip() if model_match else connector
 
-    # niri puts state on an indented line 1 — either "Disabled" or "Current mode: ..."
+    # niri puts status on indented line 1
     disabled = False
     current_mode_str: Optional[str] = None
 
@@ -123,16 +138,14 @@ def _parse_output_block(block: str) -> Optional[Monitor]:
         if second_line == "Disabled":
             disabled = True
         else:
-            current_mode_match = re.search(
+            m = re.search(
                 r'Current mode:\s*([\d]+x[\d]+\s*@\s*[\d.]+(?:\s*Hz)?)',
                 second_line
             )
-            if current_mode_match:
-                current_mode_str = current_mode_match.group(1).strip()
+            if m:
+                current_mode_str = m.group(1).strip()
 
     enabled = not disabled
-
-    # Parse remaining fields
     full_text = "\n".join(lines)
 
     physical_match = re.search(r'Physical size:\s*(\S+\s*mm)', full_text)
@@ -144,23 +157,31 @@ def _parse_output_block(block: str) -> Optional[Monitor]:
     transform_match = re.search(r'\bTransform:\s*(\S+)', full_text)
     transform = transform_match.group(1) if transform_match else None
 
-    # Parse available modes
+    # Parse available modes from "Available modes:" section only
     modes: list[MonitorMode] = []
-    for m in re.finditer(
-        r'([\d]+x[\d]+)@([\d.]+)\s*((?:\([^)]*\)\s*)*)',
-        full_text
-    ):
-        res = m.group(1)
-        refresh = float(m.group(2))
-        flags_str = m.group(3).lower()
-        preferred = "preferred" in flags_str
-        current = "current" in flags_str
-        modes.append(MonitorMode(
-            resolution=res,
-            refresh=refresh,
-            preferred=preferred,
-            current=current,
-        ))
+    in_modes = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped == "Available modes:":
+            in_modes = True
+            continue
+        if in_modes:
+            m = re.match(r'([\d]+x[\d]+)@([\d.]+)\s*(.*)', stripped)
+            if m:
+                res = m.group(1)
+                refresh = float(m.group(2))
+                flags_str = m.group(3).lower()
+                preferred = "preferred" in flags_str
+                current = "current" in flags_str
+                modes.append(MonitorMode(
+                    resolution=res,
+                    refresh=refresh,
+                    preferred=preferred,
+                    current=current,
+                ))
+            elif stripped and not stripped.startswith("#"):
+                # End of modes section
+                in_modes = False
 
     return Monitor(
         connector=connector,
@@ -175,23 +196,34 @@ def _parse_output_block(block: str) -> Optional[Monitor]:
 
 
 def set_monitor_enabled(connector: str, enabled: bool) -> tuple[bool, str]:
-    """
-    Enable or disable a monitor via wlr-randr.
-    Returns (success, message).
-    """
+    """Enable or disable a monitor via wlr-randr."""
     flag = "--on" if enabled else "--off"
+    return _run_wlr_randr(
+        ["--output", connector, flag],
+        f"Monitor {connector} {'enabled' if enabled else 'disabled'} successfully."
+    )
+
+
+def set_monitor_mode(connector: str, resolution: str, refresh: float) -> tuple[bool, str]:
+    """Change a monitor's resolution and/or refresh rate via wlr-randr."""
+    return _run_wlr_randr(
+        ["--output", connector, "--mode", resolution, "--rate", f"{refresh:.3f}"],
+        f"Mode set to {resolution} @ {refresh:.3f} Hz on {connector}."
+    )
+
+
+def _run_wlr_randr(args: list[str], success_msg: str) -> tuple[bool, str]:
     try:
         result = subprocess.run(
-            ["wlr-randr", "--output", connector, flag],
+            ["wlr-randr"] + args,
             capture_output=True, text=True, timeout=10
         )
         if result.returncode == 0:
-            return True, f"Monitor {connector} {'enabled' if enabled else 'disabled'} successfully."
-        else:
-            err = result.stderr.strip() or result.stdout.strip()
-            return False, f"wlr-randr error: {err}"
+            return True, success_msg
+        err = result.stderr.strip() or result.stdout.strip()
+        return False, f"wlr-randr error: {err}"
     except FileNotFoundError:
-        return False, "wlr-randr not found. Please install it (pacman -S wlr-randr)."
+        return False, "wlr-randr not found. Install with: pacman -S wlr-randr"
     except subprocess.TimeoutExpired:
         return False, "Timed out waiting for wlr-randr."
     except subprocess.SubprocessError as e:
@@ -206,4 +238,5 @@ if __name__ == "__main__":
             print(f"       Mode : {m.current_mode}")
         if m.physical_size:
             print(f"       Size : {m.physical_size}")
+        print(f"       Resolutions: {m.resolutions()}")
         print(f"       Modes: {len(m.modes)} available")

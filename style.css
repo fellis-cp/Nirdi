@@ -185,3 +185,60 @@ switch slider {
   color: #ff8080;
   border-color: rgba(255,80,80,0.35);
 }
+
+/* ── Mode row (resolution / refresh) ────────────────────────── */
+.mode-row-sep {
+  background-color: rgba(130, 100, 255, 0.12);
+  min-height: 1px;
+  margin: 12px 0 0 0;
+}
+
+.dropdown-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8888b8;
+}
+
+/* ── DropDown widget ─────────────────────────────────────────── */
+.mode-dropdown > button {
+  background: rgba(30, 28, 55, 0.9);
+  border: 1px solid rgba(130, 100, 255, 0.28);
+  border-radius: 8px;
+  color: #c8c8ff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  min-width: 130px;
+  transition: border-color 150ms ease;
+}
+
+.mode-dropdown > button:hover {
+  border-color: rgba(140, 110, 255, 0.55);
+  background: rgba(40, 36, 70, 0.95);
+}
+
+/* ── Apply button ────────────────────────────────────────────── */
+.apply-btn {
+  background: linear-gradient(135deg, rgba(80,140,255,0.22), rgba(110,80,255,0.22));
+  border: 1px solid rgba(100, 160, 255, 0.4);
+  border-radius: 9px;
+  color: #a0d0ff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 18px;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.apply-btn:hover {
+  background: linear-gradient(135deg, rgba(80,140,255,0.38), rgba(110,80,255,0.38));
+  border-color: rgba(120,180,255,0.65);
+  color: #d8eeff;
+}
+
+.apply-btn:active {
+  background: rgba(80, 140, 255, 0.5);
+}
+
+.apply-btn:disabled {
+  opacity: 0.5;
+}
