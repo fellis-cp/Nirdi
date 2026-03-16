@@ -2,7 +2,8 @@
 
 Nirdi is a modern, lightweight GTK4 GUI for managing monitors in the [niri](https://github.com/YaLTeR/niri) Wayland compositor. It allows you to view connected displays, toggle them on/off, and change resolutions or refresh rates with a user-friendly interface.
 
-![Nirdi Screenshot](https://raw.githubusercontent.com/username/nirdi/main/screenshot.png) *(Placeholder: Add your own screenshot here!)*
+<img width="1900" height="807" alt="image" src="https://github.com/user-attachments/assets/9f1ffa26-c883-4417-8d1f-cd8d86bf2d43" />
+
 
 ## Features
 
