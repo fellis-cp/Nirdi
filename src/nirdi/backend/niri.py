@@ -206,9 +206,10 @@ def set_monitor_enabled(connector: str, enabled: bool) -> tuple[bool, str]:
 
 def set_monitor_mode(connector: str, resolution: str, refresh: float) -> tuple[bool, str]:
     """Change a monitor's resolution and/or refresh rate via wlr-randr."""
+    mode_str = f"{resolution}@{refresh:.3f}Hz"
     return _run_wlr_randr(
-        ["--output", connector, "--mode", resolution, "--rate", f"{refresh:.3f}"],
-        f"Mode set to {resolution} @ {refresh:.3f} Hz on {connector}."
+        ["--output", connector, "--mode", mode_str],
+        f"Mode set to {mode_str} on {connector}."
     )
 
 
