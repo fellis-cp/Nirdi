@@ -40,13 +40,13 @@ mkdir -p "$DESKTOP_DIR"
 # 4. Copy sources
 echo "Copying application files to $INSTALL_DIR..."
 rm -rf "$INSTALL_DIR/*" 2>/dev/null || true
-cp -r src/nirdi "$INSTALL_DIR/"
+cp -r src/* "$INSTALL_DIR/"
 
 # 5. Create launcher script
 echo "Creating launcher at $BIN_DIR/nirdi..."
 cat > "$BIN_DIR/nirdi" << EOF
 #!/usr/bin/env bash
-export PYTHONPATH="$INSTALL_DIR/../:\$PYTHONPATH"
+export PYTHONPATH="$INSTALL_DIR:\$PYTHONPATH"
 exec python3 -m nirdi "\$@"
 EOF
 
