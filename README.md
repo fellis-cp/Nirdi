@@ -29,29 +29,31 @@ sudo pacman -S niri wlr-randr gtk4 python-gobject
 
 ## Installation & Usage
 
-### Running Locally
-You can run the application directly from the repository:
+To install Nirdi on your local user account (`~/.local/share/nirdi` and `~/.local/bin/nirdi`), simply clone this repository and run the install script:
 
 ```bash
-python3 main.py
+git clone https://github.com/username/nirdi.git
+cd nirdi
+./install.sh
 ```
 
-### Desktop Integration
-To make Nirdi appear in your application launcher (wofi, rofi, etc.), copy the `.desktop` file to your local applications directory:
+This will check dependencies, structure the Python files, install the executable script to `~/.local/bin`, and register the `.desktop` file for your application launcher.
+Make sure `~/.local/bin` is in your `$PATH`.
+
+### Running Locally without installation
+
+If you prefer to run from source without installing:
 
 ```bash
-cp niri-monitor-manager.desktop ~/.local/share/applications/
+PYTHONPATH=src python3 -m nirdi
 ```
-
-> [!NOTE]  
-> If you move the project directory, you will need to update the `Exec` path in the `.desktop` file.
 
 ## Development
 
-The project is structured into two main components:
-- `main.py`: The GTK4 application and UI layout.
-- `monitor_backend.py`: Logic for parsing `niri` output and executing `wlr-randr` commands.
-- `style.css`: Custom styling tokens for the premium dark-mode look.
+The project is structured into a standard python package under `src/`:
+- `src/nirdi/ui/app.py`: The GTK4 application and UI layout.
+- `src/nirdi/ui/style.css`: Custom styling tokens for the premium dark-mode look.
+- `src/nirdi/backend/niri.py`: Logic for parsing `niri` output and executing `wlr-randr` commands.
 
 ## License
 MIT

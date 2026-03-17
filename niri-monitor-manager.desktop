@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Monitor Manager
 Comment=Manage monitors in Niri Wayland
-Exec=python3 /home/flo/Repo/Nirdi/main.py
+Exec=nirdi
 Icon=video-display
 Terminal=false
 Type=Application

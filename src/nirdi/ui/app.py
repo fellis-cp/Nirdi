@@ -6,6 +6,7 @@ Uses `niri msg outputs` for info and `wlr-randr` for control.
 """
 
 import os
+import sys
 import threading
 import time
 
@@ -13,8 +14,8 @@ import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, GLib, Pango
 
-import monitor_backend as backend
-from monitor_backend import Monitor
+from nirdi.backend import niri as backend
+from nirdi.backend.niri import Monitor
 
 
 APP_ID = "io.niri.monitor-manager"
@@ -511,6 +512,9 @@ class MonitorManagerApp(Gtk.Application):
         """
 
 
-if __name__ == "__main__":
+def main():
     app = MonitorManagerApp()
-    app.run()
+    return app.run(sys.argv)
+
+if __name__ == "__main__":
+    sys.exit(main())
