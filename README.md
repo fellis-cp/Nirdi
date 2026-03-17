@@ -33,7 +33,7 @@ sudo pacman -S niri wlr-randr gtk4 python-gobject
 To install Nirdi on your local user account (`~/.local/share/nirdi` and `~/.local/bin/nirdi`), simply clone this repository and run the install script:
 
 ```bash
-git clone https://github.com/username/nirdi.git
+git clone https://github.com/fellis-cp/Nirdi
 cd nirdi
 ./install.sh
 ```
