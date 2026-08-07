@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Monitor Manager
+Name=Nirdi Monitor Manager
 Comment=Manage monitors in Niri Wayland
 Exec=nirdi
 Icon=video-display
