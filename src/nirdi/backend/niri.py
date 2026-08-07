@@ -119,11 +119,11 @@ def _parse_output_block(block: str) -> Optional[Monitor]:
 
     first_line = lines[0]
 
-    # Extract connector name e.g. (eDP-1)
-    connector_match = re.search(r'\(([^)]+)\)', first_line)
-    if not connector_match:
+    # Extract connector name e.g. (eDP-1) from the final set of parentheses
+    connector_matches = re.findall(r'\(([^)]+)\)', first_line)
+    if len(connector_matches) == 0:
         return None
-    connector = connector_match.group(1).strip()
+    connector = connector_matches[-1].strip()
 
     # Extract model label from first double-quoted string
     model_match = re.search(r'Output\s+"([^"]+)"', first_line)
